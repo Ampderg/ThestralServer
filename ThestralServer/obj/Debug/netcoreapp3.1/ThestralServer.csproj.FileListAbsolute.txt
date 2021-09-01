@@ -1,0 +1,13 @@
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\ThestralServer.exe
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\ThestralServer.deps.json
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\ThestralServer.runtimeconfig.json
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\ThestralServer.runtimeconfig.dev.json
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\ThestralServer.dll
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\ThestralServer.pdb
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.csprojAssemblyReference.cache
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.AssemblyInfoInputs.cache
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.AssemblyInfo.cs
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.csproj.CoreCompileInputs.cache
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.dll
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.pdb
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.genruntimeconfig.cache
