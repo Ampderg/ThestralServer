@@ -14,6 +14,20 @@ namespace ThestralServer
         internal int VelX { get; private set; }
         internal int VelY { get; private set; }
         internal double OverrideMaxMoveSpeed { get; set; }
+        internal int HalfPixelWidth
+        {
+            get
+            {
+                return EntityLibrary.entries[EntityTypeId].halfPixelWidthCol;
+            }
+        }
+        internal int HalfPixelHeight
+        {
+            get
+            {
+                return EntityLibrary.entries[EntityTypeId].halfPixelHeightCol;
+            }
+        }
 
         internal bool DoesClientHaveAuthority(uint clientId)
         {
@@ -41,17 +55,24 @@ namespace ThestralServer
             {
                 double normalX = deltaX / magnitude;
                 double normalY = deltaY / magnitude;
-                PixelX = pos[0] = PixelX + (int)Math.Round(normalX * maxDistance);
-                PixelY = pos[1] = PixelY + (int)Math.Round(normalY * maxDistance);
-            }
-            else
-            {
-                PixelX = targetX;
-                PixelY = targetY;
+                pos[0] = PixelX + (int)Math.Round(normalX * maxDistance);
+                pos[1] = PixelY + (int)Math.Round(normalY * maxDistance);
             }
             pos[2] = VelX = (100 * (pos[0] - prevX)) / Program.PixelsPerUnit;
             pos[3] = VelY = (100 * (pos[1] - prevY)) / Program.PixelsPerUnit;
-            return pos;
+
+            uint roomId = 0;
+
+            if(!(RoomCollision.TryCollide(roomId, pos[0] + HalfPixelWidth, pos[1] + HalfPixelHeight)
+                || RoomCollision.TryCollide(roomId, pos[0] - HalfPixelWidth, pos[1] + HalfPixelHeight)
+                || RoomCollision.TryCollide(roomId, pos[0] + HalfPixelWidth, pos[1] - HalfPixelHeight)
+                || RoomCollision.TryCollide(roomId, pos[0] - HalfPixelWidth, pos[1] - HalfPixelHeight)))
+            {
+                PixelX = pos[0];
+                PixelY = pos[1];
+                return pos;
+            }
+            return new int[4] { PixelX, PixelY, 0, 0 };
         }
 
         internal int[] GetVelocity()

@@ -2,7 +2,7 @@
   "profiles": {
     "ThestralServer": {
       "commandName": "Project",
-      "commandLineArgs": "192.168.1.177 59873"
+      "commandLineArgs": "192.168.1.177 59873 1"
     }
   }
 }

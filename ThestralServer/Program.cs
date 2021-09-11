@@ -10,7 +10,7 @@ namespace ThestralServer
     class Program
     {
 
-        public const int PixelsPerUnit = 10;
+        public const int PixelsPerUnit = 20;
         public static int logLevel = 0;
 
         static void Main(string[] args)
@@ -20,8 +20,14 @@ namespace ThestralServer
             Log("Populating Entity Library");
             EntityLibrary.Populate();
 
+            Log("Populating Room Collision Data");
+            RoomCollision.Initialize();
+
             List<Server> servers = new List<Server>();
-            
+
+            if (args.Length >= 3)
+                logLevel = int.Parse(args[2]);
+
             if(args.Length >= 2)
                 servers.Add(CreateServer(args[0], 0, args[1]));
             else if(args.Length == 1)

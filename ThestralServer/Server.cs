@@ -68,6 +68,10 @@ namespace ThestralServer
         internal void StopServer()
         {
             //TODO: kick clients from server
+            foreach(var pair in connectedClients)
+            {
+                SendClientMessage(pair.Key, 0, Program.FormatCommand("forceDisconnect"), false);
+            }
 
             frameStopwatch.Start();
             frameTimer.Stop();

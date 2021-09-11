@@ -31,3 +31,4 @@ D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\runtimes\win\
 D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
 D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
 D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.csproj.CopyComplete
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\RoomColliderData\TestAreaScene-index1.collision

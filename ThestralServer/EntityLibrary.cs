@@ -10,11 +10,15 @@ namespace ThestralServer
         {
             public string entityName;
             public double maxMoveSpeed;
+            public int halfPixelWidthCol;
+            public int halfPixelHeightCol;
 
-            public EntityLibraryEntry(string entityName, double maxMoveSpeed)
+            public EntityLibraryEntry(string entityName, double maxMoveSpeed, int halfPixelWidthCol = 0, int halfPixelHeightCol = 0)
             {
                 this.entityName = entityName;
                 this.maxMoveSpeed = maxMoveSpeed;
+                this.halfPixelWidthCol = halfPixelWidthCol;
+                this.halfPixelHeightCol = halfPixelHeightCol;
             }
         }
 
@@ -24,7 +28,7 @@ namespace ThestralServer
         {
             entries = new Dictionary<uint, EntityLibraryEntry>();
 
-            entries[0] = new EntityLibraryEntry("Player Character", 10);
+            entries[0] = new EntityLibraryEntry("Player Character", 10.2, 7, 1);
         }
     }
 }
