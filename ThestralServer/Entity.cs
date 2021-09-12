@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace ThestralServer
@@ -14,6 +15,15 @@ namespace ThestralServer
         internal int VelX { get; private set; }
         internal int VelY { get; private set; }
         internal double OverrideMaxMoveSpeed { get; set; }
+        internal ServerInstance parentInstance;
+        private Stopwatch timeSinceLastMove;
+
+        public Entity()
+        {
+            timeSinceLastMove = new Stopwatch();
+            timeSinceLastMove.Start();
+        }
+
         internal int HalfPixelWidth
         {
             get
@@ -41,10 +51,14 @@ namespace ThestralServer
 
         internal int[] MoveEntity(int targetX, int targetY)
         {
-            return MoveEntity(targetX, targetY, OverrideMaxMoveSpeed);
+            double distance = OverrideMaxMoveSpeed;
+            distance *= Program.PixelsPerUnit * 2;
+            distance /= parentInstance.parentServer.realTicksPerSecond;
+            return MoveEntity(targetX, targetY, distance);
         }
         internal int[] MoveEntity(int targetX, int targetY, double maxDistance)
         {
+            timeSinceLastMove.Restart();
             int prevX = PixelX;
             int prevY = PixelY;
             double deltaX = targetX - PixelX;

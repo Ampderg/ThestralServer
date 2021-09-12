@@ -38,19 +38,22 @@ namespace ThestralServer
             bool shutdown = false;
             while (!shutdown)
             {
-                string s = Console.ReadLine().ToLower();
-                switch(s)
+                if (Console.KeyAvailable)
                 {
-                    case "exit":
-                    case "quit":
-                        Log("Beginning host shutdown", LogType.Hosting_Info);
-                        shutdown = true;
-                        //process all server shutdown code
-                        for (int i = 0; i < servers.Count; i++)
-                        {
-                            servers[i].StopServer();
-                        }
-                        break;
+                    var s = Console.ReadKey(true);
+                    switch (s.Key)
+                    {
+                        case ConsoleKey.Escape:
+                        case ConsoleKey.E:
+                            Log("Beginning host shutdown", LogType.Hosting_Info);
+                            shutdown = true;
+                            //process all server shutdown code
+                            for (int i = 0; i < servers.Count; i++)
+                            {
+                                servers[i].StopServer();
+                            }
+                            break;
+                    }
                 }
             }
             Log("Host shut down, press enter to close window.", LogType.Hosting_Info);

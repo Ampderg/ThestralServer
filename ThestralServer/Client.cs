@@ -14,7 +14,7 @@ namespace ThestralServer
         private uint instanceId;
         internal bool awaitingValidation;
 
-        internal string DisplayName { get; set; }
+        internal string DisplayName { get; set; } = "Player";
 
         public Client(TcpClient client)
         {

@@ -27,6 +27,7 @@ namespace ThestralServer
             Entity e = new Entity();
             e.EntityTypeId = entityTypeId;
             e.OverrideMaxMoveSpeed = EntityLibrary.entries[entityTypeId].maxMoveSpeed;
+            e.parentInstance = this;
             uint id = entityInstanceIds.GetFreeID();
             entityInstances[id] = e;
             parentServer.Log($"Created Entity of type {entityTypeId} with entity instance id: {id} on server instance: {instanceId}", LogType.Entity_Status);

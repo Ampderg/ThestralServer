@@ -22,8 +22,8 @@ namespace ThestralServer
         private Task acceptConnectionTask;
 
         //Server Loop
-        private const double TicksPerSecond = 20;
-        private readonly double realTicksPerSecond = TicksPerSecond;
+        internal const double TicksPerSecond = 20;
+        internal double realTicksPerSecond = TicksPerSecond;
         private double msPerTick { get { return 1000.0 / realTicksPerSecond; } }
         private Stopwatch frameStopwatch;
         private Timer frameTimer;
@@ -136,6 +136,11 @@ namespace ThestralServer
 
         private void DisconnectClient(uint clientId)
         {
+            if(!connectedClients.ContainsKey(clientId))
+            {
+                Log($"Tried to disconnect client {clientId}, but could not find them in connected clients.", LogType.Warning);
+                return;
+            }
             instances[connectedClients[clientId].GetInstance()].DisconnectClient(clientId);
             connectedClients.Remove(clientId);
             clientIdAssigner.UnassignID(clientId);
@@ -218,8 +223,16 @@ namespace ThestralServer
                         //move entity to desired location
                         CmdMoveEntity(c);
                         break;
+                    case "say":
+                        CmdChatMessage(c, "Say");
+                        break;
+                    default:
+                        Log("Recieved invalid command: " + c.ToString(), LogType.Info);
+                        break;
                 }
             }
+            if (frameStopwatch.ElapsedMilliseconds >= msPerTick)
+                Log($"Cant keep up! Ended tick with {tickQueue.Count} commands remaining!");
         }
 
         private void SendClientMessage(uint clientId, uint msgId, string s, bool hasId = true)
@@ -305,6 +318,26 @@ namespace ThestralServer
                 {
                     SendClientMessage(pair.Value.clientId, 0, $"/m|{entityInstanceId}|{pos[0]}|{pos[1]}|{pos[2]}|{pos[3]}", false);
                 }
+            }
+        }
+
+        private void CmdChatMessage(Command c, string category)
+        {
+            string message = string.Join(' ', c.parameters);
+            message = message.Substring(0, Math.Min(message.Length, 50));
+
+            switch (category)
+            {
+                case "Say":
+                    foreach (var pair in connectedClients)
+                    {
+                        if (pair.Value.connectedToInstance
+                            && pair.Value.GetInstance() == connectedClients[c.clientId].GetInstance())
+                        {
+                            SendClientMessage(pair.Value.clientId, 0, $"/recieveChatMsg|say|{message}", false);
+                        }
+                    }
+                    break;
             }
         }
         #endregion
