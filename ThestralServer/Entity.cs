@@ -54,7 +54,7 @@ namespace ThestralServer
             double distance = OverrideMaxMoveSpeed;
             distance *= Program.PixelsPerUnit * 2;
             distance /= parentInstance.parentServer.realTicksPerSecond;
-            return MoveEntity(targetX, targetY, distance);
+            return MoveEntity(targetX, targetY, Math.Min(distance, 1 * Program.PixelsPerUnit));
         }
         internal int[] MoveEntity(int targetX, int targetY, double maxDistance)
         {

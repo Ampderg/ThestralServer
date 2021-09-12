@@ -141,7 +141,14 @@ namespace ThestralServer
                 Log($"Tried to disconnect client {clientId}, but could not find them in connected clients.", LogType.Warning);
                 return;
             }
-            instances[connectedClients[clientId].GetInstance()].DisconnectClient(clientId);
+            if (!(connectedClients[clientId].connectedToInstance && instances.ContainsKey(connectedClients[clientId].GetInstance())))
+            {
+                Log($"Tried removing client {clientId} from an instance, but they weren't in one!", LogType.Client_Status);
+            }
+            else
+            {
+                instances[connectedClients[clientId].GetInstance()].DisconnectClient(clientId);
+            }
             connectedClients.Remove(clientId);
             clientIdAssigner.UnassignID(clientId);
             Log($"Client {clientId} disconnected!");
@@ -175,14 +182,10 @@ namespace ThestralServer
                         Log("Accepted Client Messages:", LogType.Debug);
                         foreach (Message m in messages)
                         {
-                            string[] cmdTokens = m.message.Split('/');
-                            for (int j = 1; j < cmdTokens.Length; j++)
-                            {
-                                Command c = Command.FromMessage(index, m.id, cmdTokens[j]);
-                                tickQueue.Enqueue(c);
-                                //tickQueue.Enqueue(c, m.priority);
-                                Log(c.ToString(), LogType.Debug);
-                            }
+                            Command c = Command.FromMessage(index, m.id, m.message, m.hasId);
+                            tickQueue.Enqueue(c);
+                            //tickQueue.Enqueue(c, m.priority);
+                            Log(c.ToString(), LogType.Debug);
                         }
                     }
                 }
@@ -263,7 +266,7 @@ namespace ThestralServer
             {
                 client.awaitingValidation = false;
                 client.DisplayName = c.parameters[0];
-                SendClientMessage(c.clientId, c.messageId, string.Format("/validate|{0}", "Valid"));
+                SendClientMessage(c.clientId, c.messageId, string.Format("validate|{0}", "Valid"));
             }
         }
 
@@ -334,7 +337,7 @@ namespace ThestralServer
                         if (pair.Value.connectedToInstance
                             && pair.Value.GetInstance() == connectedClients[c.clientId].GetInstance())
                         {
-                            SendClientMessage(pair.Value.clientId, 0, $"/recieveChatMsg|say|{message}", false);
+                            SendClientMessage(pair.Value.clientId, c.messageId, Program.FormatCommand("recieveChatMsg", "say", message));
                         }
                     }
                     break;

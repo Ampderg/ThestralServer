@@ -36,8 +36,12 @@ namespace ThestralServer
                 byte[] bytes = new byte[client.Available];
                 int byteCount = stream.Read(bytes, 0, bytes.Length);
                 string[] s = Encoding.ASCII.GetString(bytes, 0, byteCount).Split('\n');
-                for(int i = 0; i < s.Length - 1; i++)
-                    messages.Add(Message.FromString(s[i]));
+                for (int i = 0; i < s.Length - 1; i++)
+                {
+                    Message m = Message.FromString(s[i]);
+                    if(m != null)
+                        messages.Add(m);
+                }
             }
             return messages.ToArray();
         }

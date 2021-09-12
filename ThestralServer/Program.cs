@@ -130,7 +130,7 @@ namespace ThestralServer
 
         public static string FormatCommand(string command, params string[] pars)
         {
-            string s = "/" + command;
+            string s = command;
             foreach(string p in pars)
             {
                 s += "|" + p;
