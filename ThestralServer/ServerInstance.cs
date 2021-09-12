@@ -22,12 +22,13 @@ namespace ThestralServer
             connectedClients = new Dictionary<uint, Client>();
         }
 
-        internal uint CreateEntity(uint entityTypeId)
+        internal uint CreateEntity(uint entityTypeId, string customDisplayName = "")
         {
             Entity e = new Entity();
             e.EntityTypeId = entityTypeId;
             e.OverrideMaxMoveSpeed = EntityLibrary.entries[entityTypeId].maxMoveSpeed;
             e.parentInstance = this;
+            e.DisplayName = (string.IsNullOrEmpty(customDisplayName) ? EntityLibrary.entries[entityTypeId].entityName : customDisplayName);
             uint id = entityInstanceIds.GetFreeID();
             entityInstances[id] = e;
             parentServer.Log($"Created Entity of type {entityTypeId} with entity instance id: {id} on server instance: {instanceId}", LogType.Entity_Status);
@@ -43,6 +44,15 @@ namespace ThestralServer
                 parentServer.DestroyEntityForClient(entityInstanceId, pair.Key);
             }
             parentServer.Log($"Destroying Entity with instance id: {entityInstanceId}", LogType.Entity_Status);
+        }
+
+        internal string GetEntityName(uint entityInstanceId)
+        {
+            return entityInstances[entityInstanceId].DisplayName;
+        }
+        internal void SetEntityName(uint entityInstanceId, string name)
+        {
+            entityInstances[entityInstanceId].DisplayName = name;
         }
 
         internal void GrantAuthority(uint entityInstanceId, uint clientId)
@@ -105,7 +115,7 @@ namespace ThestralServer
             {
                 s[i] = Program.FormatCommand("createEntity",
                     pair.Value.EntityTypeId.ToString(), pair.Value.PixelX.ToString(), pair.Value.PixelY.ToString(),
-                    false.ToString(), instanceId.ToString(), pair.Key.ToString());
+                    false.ToString(), instanceId.ToString(), pair.Key.ToString(), pair.Value.DisplayName);
                 parentServer.Log("Populated instance command: " + s[i]);
                 i++;
             }

@@ -15,6 +15,7 @@ namespace ThestralServer
         internal int VelX { get; private set; }
         internal int VelY { get; private set; }
         internal double OverrideMaxMoveSpeed { get; set; }
+        internal string DisplayName { get; set; }
         internal ServerInstance parentInstance;
         private Stopwatch timeSinceLastMove;
 
@@ -93,5 +94,6 @@ namespace ThestralServer
         {
             return new int[2] { VelX, VelY };
         }
+
     }
 }

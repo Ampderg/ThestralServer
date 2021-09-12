@@ -104,6 +104,9 @@ namespace ThestralServer
                 case LogType.Debug:
                     color = ConsoleColor.DarkGray;
                     break;
+                case LogType.Chat:
+                    color = ConsoleColor.DarkCyan;
+                    break;
                 case LogType.Client_Status:
                     color = ConsoleColor.Blue;
                     break;
@@ -142,11 +145,12 @@ namespace ThestralServer
     public enum LogType
     {
         Debug = 0,
-        Info = 1,
+        Chat = 4,
+        Info = 5,
         Hosting_Info = 99,
         Client_Status = 15,
         Server_Status = 90,
-        Entity_Status = 5,
+        Entity_Status = 10,
         Warning = 50,
         Error = 100
     }

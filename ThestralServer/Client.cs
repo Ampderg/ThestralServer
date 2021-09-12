@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using ThestralServer.DatabaseInterfacing;
 
 namespace ThestralServer
 {
@@ -13,6 +14,7 @@ namespace ThestralServer
         internal bool connectedToInstance = false;
         private uint instanceId;
         internal bool awaitingValidation;
+        internal Player player;
 
         internal string DisplayName { get; set; } = "Player";
 
