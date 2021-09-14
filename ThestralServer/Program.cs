@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace ThestralServer
@@ -12,10 +14,12 @@ namespace ThestralServer
 
         public const int PixelsPerUnit = 20;
         public static int logLevel = 0;
+        internal static X509Certificate serverCertificate;
 
         static void Main(string[] args)
         {
             Log("---ThestralServer v0.1.0---", LogType.Hosting_Info);
+
 
             Log("Populating Entity Library");
             EntityLibrary.Populate();
@@ -24,6 +28,17 @@ namespace ThestralServer
             RoomCollision.Initialize();
 
             List<Server> servers = new List<Server>();
+
+            string certPath;
+            if(args.Length >= 4)
+                certPath = args[3];
+            else
+                certPath = "certificate.cer";
+
+            if (File.Exists(certPath))
+                serverCertificate = X509Certificate.CreateFromCertFile(certPath);
+            else
+                serverCertificate = new X509Certificate(certPath);
 
             if (args.Length >= 3)
                 logLevel = int.Parse(args[2]);

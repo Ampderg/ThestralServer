@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Text;
 using ThestralServer.DatabaseInterfacing;
 
@@ -9,7 +11,7 @@ namespace ThestralServer
     class Client
     {
         private readonly TcpClient client;
-        private readonly NetworkStream stream;
+        private readonly SslStream stream;
         internal uint clientId;
         internal bool connectedToInstance = false;
         private uint instanceId;
@@ -22,7 +24,21 @@ namespace ThestralServer
         {
             this.client = client;
             awaitingValidation = true;
-            stream = client.GetStream();
+            stream = new SslStream(client.GetStream(), false);
+            try
+            {
+                stream.AuthenticateAsServer(Program.serverCertificate, false, SslProtocols.Tls12, true);
+                stream.ReadTimeout = 5000;
+                stream.WriteTimeout = 5000;
+
+
+            }
+            catch (AuthenticationException ex)
+            {
+                Program.Log(ex.ToString());
+                stream.Close();
+                client.Close();
+            }
         }
 
         internal bool IsConnected()
