@@ -7,7 +7,7 @@ namespace ThestralServer
 {
     class ServerInstance
     {
-        private Dictionary<uint, Entity> entityInstances;
+        internal Dictionary<uint, Entity> entityInstances;
         private IdAssigner entityInstanceIds;
         internal Dictionary<uint, Client> connectedClients;
         internal int playerCountLimit = 1000;
@@ -109,17 +109,19 @@ namespace ThestralServer
 
         internal string[] PopulateCurrentEntitiesCommandStrings()
         {
-            string[] s = new string[entityInstances.Count];
-            int i = 0;
+            List<string> s = new List<string>();
             foreach(var pair in entityInstances)
             {
-                s[i] = Program.FormatCommand("createEntity",
+                s.Add(Program.FormatCommand("createEntity",
                     pair.Value.EntityTypeId.ToString(), pair.Value.PixelX.ToString(), pair.Value.PixelY.ToString(),
-                    false.ToString(), instanceId.ToString(), pair.Key.ToString(), pair.Value.DisplayName);
-                parentServer.Log("Populated instance command: " + s[i]);
-                i++;
+                    false.ToString(), instanceId.ToString(), pair.Key.ToString(), pair.Value.DisplayName));
+                //parentServer.Log("Populated instance command: " + s[i]);
+                foreach (var pair2 in pair.Value.properties)
+                {
+                    s.Add(Program.FormatCommand("setEntityProperty", pair.Key.ToString(), pair2.Key, pair2.Value));
+                }
             }
-            return s;
+            return s.ToArray();
         }
     }
 }

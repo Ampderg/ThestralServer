@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
@@ -11,11 +12,12 @@ namespace ThestralServer
     class Client
     {
         private readonly TcpClient client;
-        private readonly SslStream stream;
+        private readonly NetworkStream stream;
         internal uint clientId;
         internal bool connectedToInstance = false;
         private uint instanceId;
         internal bool awaitingValidation;
+        internal uint localPlayerEntityInstance;
         internal Player player;
 
         internal string DisplayName { get; set; } = "Player";
@@ -24,21 +26,7 @@ namespace ThestralServer
         {
             this.client = client;
             awaitingValidation = true;
-            stream = new SslStream(client.GetStream(), false);
-            try
-            {
-                stream.AuthenticateAsServer(Program.serverCertificate, false, SslProtocols.Tls12, true);
-                stream.ReadTimeout = 5000;
-                stream.WriteTimeout = 5000;
-
-
-            }
-            catch (AuthenticationException ex)
-            {
-                Program.Log(ex.ToString());
-                stream.Close();
-                client.Close();
-            }
+            stream = client.GetStream();
         }
 
         internal bool IsConnected()

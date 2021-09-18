@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -69,7 +70,7 @@ namespace ThestralServer
         internal void StopServer()
         {
             //TODO: kick clients from server
-            foreach(var pair in connectedClients)
+            foreach (var pair in connectedClients)
             {
                 SendClientMessage(pair.Key, 0, Program.FormatCommand("forceDisconnect"), false);
             }
@@ -137,7 +138,7 @@ namespace ThestralServer
 
         private void DisconnectClient(uint clientId)
         {
-            if(!connectedClients.ContainsKey(clientId))
+            if (!connectedClients.ContainsKey(clientId))
             {
                 Log($"Tried to disconnect client {clientId}, but could not find them in connected clients.", LogType.Warning);
                 return;
@@ -150,6 +151,7 @@ namespace ThestralServer
             {
                 instances[connectedClients[clientId].GetInstance()].DisconnectClient(clientId);
             }
+            DatabaseInterface.DisconnectClient(clientId);
             connectedClients.Remove(clientId);
             clientIdAssigner.UnassignID(clientId);
             Log($"Client {clientId} disconnected!");
@@ -213,6 +215,9 @@ namespace ThestralServer
                     case "validate":
                         CmdValidateClient(c);
                         break;
+                    case "login":
+                        CmdLoginClient(c);
+                        break;
                     case "joinScene":
                         //Called when a player joins a scene by scene build id
                         //TODO: add code for joining an instance, adding player character for all players, and populating
@@ -230,6 +235,12 @@ namespace ThestralServer
                     case "say":
                         CmdChatMessage(c, "Say");
                         break;
+                    case "setChar":
+                        CmdSetChar(c);
+                        break;
+                    case "getChar":
+                        CmdGetChar(c);
+                        break;
                     default:
                         Log("Recieved invalid command: " + c.ToString(), LogType.Info);
                         break;
@@ -244,7 +255,16 @@ namespace ThestralServer
             if (connectedClients[clientId].IsConnected())
             {
                 string message = string.Format("{0}:{1}\n", (hasId ? msgId.ToString() : ""), s);
-                connectedClients[clientId].SendMessage(Encoding.ASCII.GetBytes(message));
+                try
+                { 
+                    connectedClients[clientId].SendMessage(Encoding.ASCII.GetBytes(message));
+                }
+                catch (IOException)
+                {
+                    Program.Log($"Failed to send message [{s}] to client {clientId}, disconnecting them.", LogType.Info);
+                    DisconnectClient(clientId);
+                    return;
+                }
                 Log("Sent " + clientId + " message: " + message, LogType.Debug);
             }
             else
@@ -269,20 +289,38 @@ namespace ThestralServer
                 client.awaitingValidation = false;
                 //get client data from server
                 Player p = new Player();
-                if (c.parameters.Length >= 2 && p.LogIn(c.parameters[0], c.parameters[1]))
+                if (c.parameters.Length >= 1 && p.LogIn(c.parameters[0]))
                 {
+                    p.accountName = c.parameters[0];
                     //set client info and send valid message
                     client.DisplayName = c.parameters[0];
                     client.player = p;
-                    SendClientMessage(c.clientId, c.messageId, string.Format("validate|{0}", "Valid"));
+                    SendClientMessage(c.clientId, c.messageId, Program.FormatCommand("validate", "Valid", c.clientId.ToString()));
                 }
                 else
                 {
-                    SendClientMessage(c.clientId, c.messageId, string.Format("validate|{0}", "Incorrect login information"));
+                    SendClientMessage(c.clientId, c.messageId, Program.FormatCommand("validate", "Invalid", "0"));
                     DisconnectClient(c.clientId);
                 }
             }
         }
+
+        //Notifies the server that the client is logged in on their end, verify, and let the client join
+        private void CmdLoginClient(Command c)
+        {
+            uint? id = DatabaseInterface.GetClientUserID(c.clientId, connectedClients[c.clientId].player.accountName);
+            if (id != null)
+            {
+                connectedClients[c.clientId].player.playerId = (uint)id;
+                Log($"Client {c.clientId} logged in with player {id} [{connectedClients[c.clientId].player.accountName}]", LogType.Client_Status);
+                SendClientMessage(c.clientId, c.messageId, Program.FormatCommand("login", "Valid"));
+            }
+            else
+            {
+                DisconnectClient(c.clientId);
+            }
+        }
+
 
         //Validate the connecting client's information and send a message back to them to confirm their state.
         //Expected parameters:
@@ -290,7 +328,7 @@ namespace ThestralServer
         private void CmdJoinScene(Command c)
         {
             //Get a free instance
-            if(connectedClients[c.clientId].connectedToInstance)
+            if (connectedClients[c.clientId].connectedToInstance)
             {
                 instances[connectedClients[c.clientId].GetInstance()].DisconnectClient(c.clientId);
             }
@@ -299,12 +337,16 @@ namespace ThestralServer
             connectedClients[c.clientId].SetInstance(instance.instanceId);
             //Send the current entity information to the player
             string[] currentEntities = instance.PopulateCurrentEntitiesCommandStrings();
-            foreach(string cmd in currentEntities)
+            foreach (string cmd in currentEntities)
             {
                 SendClientMessage(c.clientId, 0, cmd, false);
             }
             //Create the joining player character
             uint newId = CreateEntity(instance.instanceId, 0, 0, 0, true, c.clientId);
+            connectedClients[c.clientId].localPlayerEntityInstance = newId;
+            string app = instance.entityInstances[newId].properties["character_appearance"] = DatabaseInterface.GetCharAppearance(
+                connectedClients[c.clientId].player.playerId, 0);
+            SetEntityProperty(instance.instanceId, newId, "character_appearance", app);
             SetPlayerInfo(c, newId);
         }
 
@@ -329,9 +371,9 @@ namespace ThestralServer
             }
 
             //RPC update player position
-            foreach(var pair in connectedClients)
+            foreach (var pair in connectedClients)
             {
-                if(pair.Value.clientId != c.clientId && pair.Value.connectedToInstance 
+                if (pair.Value.clientId != c.clientId && pair.Value.connectedToInstance
                     && pair.Value.GetInstance() == connectedClients[c.clientId].GetInstance())
                 {
                     SendClientMessage(pair.Value.clientId, 0, $"m|{entityInstanceId}|{pos[0]}|{pos[1]}|{pos[2]}|{pos[3]}", false);
@@ -360,6 +402,24 @@ namespace ThestralServer
 
             Log($"{name} ({category}): {message}", LogType.Chat);
         }
+
+        private void CmdSetChar(Command c)
+        {
+            //TODO: add char string validation
+            DatabaseInterface.SetChar(connectedClients[c.clientId].player.playerId, uint.Parse(c.parameters[0]), c.parameters[1]);
+            if (connectedClients[c.clientId].connectedToInstance)
+            {
+                SetEntityProperty(connectedClients[c.clientId].GetInstance(), 
+                    connectedClients[c.clientId].localPlayerEntityInstance, "character_appearance", c.parameters[1]);
+            }
+        }
+
+        private void CmdGetChar(Command c)
+        {
+            //TODO: add char string validation
+            string s = DatabaseInterface.GetCharAppearance(connectedClients[c.clientId].player.playerId, uint.Parse(c.parameters[0]));
+            SendClientMessage(c.clientId, c.messageId, Program.FormatCommand("stringCallback", s));
+        }
         #endregion
 
         #region Server Commands
@@ -378,22 +438,22 @@ namespace ThestralServer
             else return filtered.First().Value;
         }
 
-        private uint CreateEntity(uint instanceId, uint entityTypeId, int pixelX = 0, int pixelY = 0, bool hasClientAuthority = false, uint clientAuthority = 0, 
+        private uint CreateEntity(uint instanceId, uint entityTypeId, int pixelX = 0, int pixelY = 0, bool hasClientAuthority = false, uint clientAuthority = 0,
             string customDisplayName = "")
         {
             uint entityInstanceId = instances[instanceId].CreateEntity(entityTypeId, customDisplayName);
-            if(hasClientAuthority)
+            if (hasClientAuthority)
                 instances[instanceId].GrantAuthority(entityInstanceId, clientAuthority);
 
             //RPC send entity to clients
-            foreach(var pair in connectedClients)
+            foreach (var pair in connectedClients)
             {
                 if (pair.Value.GetInstance() == instanceId)
                 {
                     bool doesClientHaveAuthority = instances[instanceId].DoesClientHaveAuthorityOverEntity(pair.Value.clientId, entityInstanceId);
                     SendClientMessage(pair.Value.clientId, 0, Program.FormatCommand("createEntity",
-                        entityTypeId.ToString(), pixelX.ToString(), pixelY.ToString(), 
-                        doesClientHaveAuthority.ToString(), instanceId.ToString(), entityInstanceId.ToString(), 
+                        entityTypeId.ToString(), pixelX.ToString(), pixelY.ToString(),
+                        doesClientHaveAuthority.ToString(), instanceId.ToString(), entityInstanceId.ToString(),
                         instances[instanceId].GetEntityName(entityInstanceId)));
                 }
             }
@@ -411,10 +471,23 @@ namespace ThestralServer
                 if (pair.Value.connectedToInstance
                     && pair.Value.GetInstance() == si.instanceId)
                 {
-                    SendClientMessage(pair.Value.clientId, 0, Program.FormatCommand("setPlayerInfo", 
-                        p.playerId.ToString(), 
+                    SendClientMessage(pair.Value.clientId, 0, Program.FormatCommand("setPlayerInfo",
+                        p.playerId.ToString(),
                         entityInstanceId.ToString(),
                         si.GetEntityName(entityInstanceId)), false);
+                }
+            }
+        }
+
+        private void SetEntityProperty(uint instanceId, uint entityInstanceId, string property, string val)
+        {
+            foreach (var pair in connectedClients)
+            {
+                if (pair.Value.connectedToInstance
+                    && pair.Value.GetInstance() == instanceId)
+                {
+                    SendClientMessage(pair.Value.clientId, 0, Program.FormatCommand(
+                        "setEntityProperty", entityInstanceId.ToString(), property, val), false);
                 }
             }
         }

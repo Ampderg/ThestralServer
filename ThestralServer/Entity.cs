@@ -19,6 +19,8 @@ namespace ThestralServer
         internal ServerInstance parentInstance;
         private Stopwatch timeSinceLastMove;
 
+        internal Dictionary<string, string> properties = new Dictionary<string, string>();
+
         public Entity()
         {
             timeSinceLastMove = new Stopwatch();
@@ -94,6 +96,5 @@ namespace ThestralServer
         {
             return new int[2] { VelX, VelY };
         }
-
     }
 }

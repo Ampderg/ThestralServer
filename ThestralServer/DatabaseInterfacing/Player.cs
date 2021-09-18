@@ -10,7 +10,7 @@ namespace ThestralServer.DatabaseInterfacing
         internal string accountName;
         internal string displayName;
 
-        internal bool LogIn(string username, string password)
+        internal bool LogIn(string username)
         {
             if (string.IsNullOrWhiteSpace(username)) return false;
             displayName = accountName = username;

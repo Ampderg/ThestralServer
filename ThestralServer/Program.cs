@@ -14,7 +14,6 @@ namespace ThestralServer
 
         public const int PixelsPerUnit = 20;
         public static int logLevel = 0;
-        internal static X509Certificate serverCertificate;
 
         static void Main(string[] args)
         {
@@ -27,28 +26,31 @@ namespace ThestralServer
             Log("Populating Room Collision Data");
             RoomCollision.Initialize();
 
+            
+
             List<Server> servers = new List<Server>();
 
-            string certPath;
-            if(args.Length >= 4)
-                certPath = args[3];
-            else
-                certPath = "certificate.cer";
+            string php = "server=localhost;user=root;database=THES;port=3306;password=password";
+            string writePw = "";
+            if (args.Length >= 5)
+            {
+                php = args[3];
+                writePw = args[4];
+            }
 
-            if (File.Exists(certPath))
-                serverCertificate = X509Certificate.CreateFromCertFile(certPath);
-            else
-                serverCertificate = new X509Certificate(certPath);
+            Log("Connecting to database");
+            DatabaseInterface.ConnectToDatabase(php, writePw);
 
             if (args.Length >= 3)
                 logLevel = int.Parse(args[2]);
-
             if(args.Length >= 2)
                 servers.Add(CreateServer(args[0], 0, args[1]));
             else if(args.Length == 1)
                 servers.Add(CreateServer(args[0]));
             else
                 servers.Add(CreateServer());
+
+
 
             bool shutdown = false;
             while (!shutdown)
@@ -140,6 +142,9 @@ namespace ThestralServer
                 case LogType.Entity_Status:
                     color = ConsoleColor.DarkBlue;
                     break;
+                case LogType.Database_Status:
+                    color = ConsoleColor.Green;
+                    break;
             }
             Console.ForegroundColor = color;
             Console.WriteLine(text);
@@ -167,6 +172,7 @@ namespace ThestralServer
         Server_Status = 90,
         Entity_Status = 10,
         Warning = 50,
-        Error = 100
+        Error = 100,
+        Database_Status = 75
     }
 }

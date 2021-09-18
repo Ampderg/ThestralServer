@@ -9,7 +9,6 @@ D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServe
 D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.dll
 D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.pdb
 D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.genruntimeconfig.cache
-D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.csproj.CoreCompileInputs.cache
 D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\BouncyCastle.Crypto.dll
 D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\Google.Protobuf.dll
 D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\K4os.Compression.LZ4.dll
@@ -32,3 +31,5 @@ D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\runtimes\win\
 D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.csproj.CopyComplete
 D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\RoomColliderData\TestAreaScene-index1.collision
 D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.csprojAssemblyReference.cache
+D:\Source\C#\ThestralServer\ThestralServer\bin\Debug\netcoreapp3.1\RestSharp.dll
+D:\Source\C#\ThestralServer\ThestralServer\obj\Debug\netcoreapp3.1\ThestralServer.csproj.CoreCompileInputs.cache

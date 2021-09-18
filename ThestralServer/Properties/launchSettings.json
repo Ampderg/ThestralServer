@@ -2,7 +2,7 @@
   "profiles": {
     "ThestralServer": {
       "commandName": "Project",
-      "commandLineArgs": "192.168.1.177 59873 1"
+      "commandLineArgs": "192.168.1.177 59873 0 https://www.ampderg.com/thestral/php/write/ @\"?#n96_psXTaj*u9A9a<yz3}2=Z\\}-=\""
     }
   }
 }
